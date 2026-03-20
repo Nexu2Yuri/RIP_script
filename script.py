@@ -207,20 +207,26 @@ def update_tables(riplist, update_sender):
             if newcost < currentcost:		# lower-cost route
                 interface = None
                 RTable[TK] = TableValue(interface, update_sender, newcost)
-                call_list = ['ip', 'route', 'change', f"{ipaddr}/{slash(aton(netmask))}", 'via', update_sender, 'metric', newcost]
+                del_list = ['ip', 'route', 'del', f"{ipaddr}/{slash(aton(netmask))}"]
+                call_list = ['ip', 'route', 'add', f"{ipaddr}/{slash(aton(netmask))}", 'via', update_sender, 'metric', newcost]
                 print (f'updating route to {ipaddr}/{slash(aton(netmask))}, via {update_sender} lower cost {newcost}')
-                if MODTABLES: subprocess.call(call_list)
+                if MODTABLES: 
+                    subprocess.call(del_list)
+                    subprocess.call(call_list)
             elif newcost > currentcost and currentnexthop == update_sender: # next_hop increase
                 interface = None
                 RTable[TK] = TableValue(interface, update_sender, newcost)
-                call_list = ['ip', 'route', 'change', f"{ipaddr}/{slash(aton(netmask))}", 'via', update_sender, 'metric', newcost]
+                del_list = ['ip', 'route', 'del', f"{ipaddr}/{slash(aton(netmask))}"]
+                call_list = ['ip', 'route', 'add', f"{ipaddr}/{slash(aton(netmask))}", 'via', update_sender, 'metric', newcost]
                 print (f'updating route to {ipaddr}/{slash(aton(netmask))}, via {update_sender} upper cost {newcost}')
-                if MODTABLES: subprocess.call(call_list)
+                if MODTABLES: 
+                    subprocess.call(del_list)
+                    subprocess.call(call_list)
         else:		# this is a new destination
            interface = None
            cost = entry.metric() + 100
            RTable[TK] = TableValue(interface, update_sender, cost)
-           call_list = ['ip', 'route', 'add', f"{ipaddr}/{slash(aton(netmask))}", 'via', update_sender]
+           call_list = ['ip', 'route', 'add', f"{ipaddr}/{slash(aton(netmask))}", 'via', update_sender, 'metric', cost]
            print (f'adding route to new destination {ipaddr}/{slash(aton(netmask))}, via {update_sender} cost {cost}')
            if MODTABLES: subprocess.call(call_list)        
 
