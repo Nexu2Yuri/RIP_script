@@ -223,12 +223,15 @@ def update_tables(riplist, update_sender):
                     subprocess.call(del_list)
                     subprocess.call(call_list)
         else:		# this is a new destination
-           interface = None
-           cost = entry.metric() + 100
-           RTable[TK] = TableValue(interface, update_sender, cost)
-           call_list = ['ip', 'route', 'add', f"{ipaddr}/{slash(aton(netmask))}", 'via', update_sender, 'metric', cost]
-           print (f'adding route to new destination {ipaddr}/{slash(aton(netmask))}, via {update_sender} cost {cost}')
-           if MODTABLES: subprocess.call(call_list)        
+            interface = None
+            cost = entry.metric() + 100
+            RTable[TK] = TableValue(interface, update_sender, cost)
+            del_list = ['ip', 'route', 'del', f"{ipaddr}/{slash(aton(netmask))}"]
+            call_list = ['ip', 'route', 'add', f"{ipaddr}/{slash(aton(netmask))}", 'via', update_sender, 'metric', cost]
+            print (f'adding route to new destination {ipaddr}/{slash(aton(netmask))}, via {update_sender} cost {cost}')
+            if MODTABLES: 
+                subprocess.call(del_list)
+                subprocess.call(call_list)    
 
 
 def send_update(socks):
